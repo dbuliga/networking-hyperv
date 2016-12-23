@@ -18,6 +18,7 @@ import platform
 import sys
 
 from neutron.agent.common import config
+from neutron.agent.l2.extensions import qos as qos_extension
 from neutron.agent import rpc as agent_rpc
 from neutron.agent import securitygroups_rpc as sg_rpc
 from neutron.common import config as common_config
@@ -132,7 +133,14 @@ class HyperVNeutronAgent(hyperv_neutron_agent.HyperVNeutronAgentMixin):
 
         self.connection = agent_rpc.create_consumers(self.endpoints,
                                                      self.topic,
-                                                     consumers)
+                                                     consumers,
+                                                     start_listening=False)
+
+        self._qos_ext = qos_extension.QosAgentExtension()
+        self._qos_ext.consume_api(self)
+        self._qos_ext.initialize(self.connection, 'hyperv')
+
+        self.connection.consume_in_threads()
 
         self.client = n_rpc.get_client(self.target)
         report_interval = CONF.AGENT.report_interval

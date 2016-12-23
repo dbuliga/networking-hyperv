@@ -338,6 +338,7 @@ networking-plugin-hyperv_agent.html
                                  device_details['physical_network'],
                                  device_details['segmentation_id'],
                                  device_details['admin_state_up'])
+            self._qos_ext.handle_port(self.context, device_details)
 
             LOG.debug("Updating cached port %s status as UP.", port_id)
             self._update_port_status_cache(device, device_bound=True)
